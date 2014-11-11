@@ -7,7 +7,7 @@ public class WordNet {
 
     private Map<Integer, String> idToNouns = new HashMap<>();
     private Map<String, List<Integer>> nounToIds = new HashMap<>();
-    private Digraph G;
+    private SAP sap;
 
     // constructor takes the name of the two input files
     public WordNet(String synsetsFile, String hypernymsFile) {
@@ -32,7 +32,7 @@ public class WordNet {
         }
         synsetsIn.close();
 
-        G = new Digraph(vertices);
+        Digraph graph = new Digraph(vertices);
         In hypernymsIn = new In(hypernymsFile);
         line = hypernymsIn.readLine();
         while (line != null) {
@@ -42,7 +42,7 @@ public class WordNet {
             // Form the edges
             for (int i = 1; i < parts.length; i++) {
                 int parent = Integer.parseInt(parts[i]);
-                G.addEdge(id, parent);
+                graph.addEdge(id, parent);
             }
 
             line = hypernymsIn.readLine();
@@ -52,7 +52,7 @@ public class WordNet {
         // Is this a rooted DAG?
         boolean rootFound = false;
         for (int i = 0; i < vertices; i++) {
-            if (!G.adj(i).iterator().hasNext()) {
+            if (!graph.adj(i).iterator().hasNext()) {
                 if (!rootFound)
                     rootFound = true;
                 else
@@ -61,9 +61,11 @@ public class WordNet {
         }
         if (!rootFound)
             throw new IllegalArgumentException("No root found");
-        DirectedCycle dc = new DirectedCycle(G);
+        DirectedCycle dc = new DirectedCycle(graph);
         if (dc.hasCycle())
             throw new IllegalArgumentException("Has cycles");
+
+        this.sap = new SAP(graph);
     }
 
     // returns all WordNet nouns
@@ -82,8 +84,7 @@ public class WordNet {
     public int distance(String nounA, String nounB) {
         if (!isNoun(nounA) || !isNoun(nounB))
             throw new IllegalArgumentException();
-        SAP sap = new SAP(G);
-        return sap.length(nounToIds.get(nounA), nounToIds.get(nounB));
+        return this.sap.length(nounToIds.get(nounA), nounToIds.get(nounB));
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of
@@ -92,18 +93,24 @@ public class WordNet {
     public String sap(String nounA, String nounB) {
         if (!isNoun(nounA) || !isNoun(nounB))
             throw new IllegalArgumentException();
-        SAP sap = new SAP(G);
-        int ancestor = sap.ancestor(nounToIds.get(nounA), nounToIds.get(nounB));
+        int ancestor = this.sap.ancestor(nounToIds.get(nounA), nounToIds.get(nounB));
         return idToNouns.get(ancestor);
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet wn = new WordNet(args[0], args[1]);
+        /*WordNet wn = new WordNet(args[0], args[1]);
         for (String nounA : wn.nouns()) {
             for (String nounB : wn.nouns())
                 StdOut.printf("nounA: %s, nounB: %s, distance: %d\n", nounA,
                         nounB, wn.distance(nounA, nounB));
+        }*/
+        WordNet wn = new WordNet("wordnet/synsets.txt", "wordnet/hypernyms.txt");
+        while (!StdIn.isEmpty()) {
+            String nounA = StdIn.readString();
+            String nounB = StdIn.readString();
+            StdOut.printf("nounA: %s, nounB: %s, distance: %d, sap: %s\n",
+                    nounA, nounB, wn.distance(nounA, nounB), wn.sap(nounA, nounB));
         }
     }
 }
