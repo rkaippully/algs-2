@@ -123,6 +123,9 @@ public class SeamCarver {
 
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
+        if (height <= 1)
+            throw new IllegalArgumentException("height <= 1");
+
         if (!isTransposed)
             transpose();
         removeVerticalSeamInternal(seam);
@@ -131,6 +134,9 @@ public class SeamCarver {
 
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
+        if (width <= 1)
+            throw new IllegalArgumentException("width <= 1");
+
         if (isTransposed)
             transpose();
         removeVerticalSeamInternal(seam);
@@ -138,6 +144,13 @@ public class SeamCarver {
     }
 
     private void removeVerticalSeamInternal(int[] seam) {
+        // Is this a valid seam?
+        if (seam.length != picture.length)
+            throw new IllegalArgumentException("Incorrect seam length");
+        for (int i = 0; i < seam.length; i++)
+            if (i > 0 && Math.abs(seam[i] - seam[i - 1]) > 1)
+                throw new IllegalArgumentException("Seam entry variance");
+
         int newWidth = picture[0].length - 1;
         for (int i = 0; i < seam.length; i++) {
             Color[] oldRow = picture[i];
