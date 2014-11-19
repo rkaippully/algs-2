@@ -7,7 +7,7 @@ import java.awt.Color;
 public class SeamCarver {
 
     private int height, width;
-    private Color[][] picture;
+    private byte[][][] picture;
     private int[][] energy;
     private boolean isTransposed;
 
@@ -15,11 +15,15 @@ public class SeamCarver {
     public SeamCarver(Picture pic) {
         this.width = pic.width();
         this.height = pic.height();
-        this.picture = new Color[height][width];
+        this.picture = new byte[height][width][3];
 
         for (int x = 0; x < height; x++)
-            for (int y = 0; y < width; y++)
-                this.picture[x][y] = pic.get(y, x);
+            for (int y = 0; y < width; y++) {
+                Color c = pic.get(y, x);
+                this.picture[x][y][0] = (byte) c.getRed();
+                this.picture[x][y][1] = (byte) c.getGreen();
+                this.picture[x][y][2] = (byte) c.getBlue();
+            }
 
         this.isTransposed = false;
 
@@ -41,10 +45,10 @@ public class SeamCarver {
                     + deltaEnergy(picture[x][y - 1], picture[x][y + 1]);
     }
 
-    private int deltaEnergy(Color c1, Color c2) {
-        int r = c1.getRed() - c2.getRed();
-        int g = c1.getGreen() - c2.getGreen();
-        int b = c1.getBlue() - c2.getBlue();
+    private int deltaEnergy(byte[] p1, byte[] p2) {
+        int r = (p1[0] & 0xff) - (p2[0] & 0xff);
+        int g = (p1[1] & 0xff) - (p2[1] & 0xff);
+        int b = (p1[2] & 0xff) - (p2[2] & 0xff);
         return r * r + g * g + b * b;
     }
 
@@ -55,8 +59,13 @@ public class SeamCarver {
 
         Picture pic = new Picture(width, height);
         for (int x = 0; x < height; x++)
-            for (int y = 0; y < width; y++)
-                pic.set(y, x, this.picture[x][y]);
+            for (int y = 0; y < width; y++) {
+                int r = this.picture[x][y][0] & 0xff;
+                int g = this.picture[x][y][1] & 0xff;
+                int b = this.picture[x][y][2] & 0xff;
+                Color c = new Color(r, g, b);
+                pic.set(y, x, c);
+            }
         return pic;
     }
 
@@ -69,7 +78,7 @@ public class SeamCarver {
             p = width;
             q = height;
         }
-        Color[][] transPic = new Color[p][q];
+        byte[][][] transPic = new byte[p][q][3];
         int[][] transEnergy = new int[p][q];
         for (int x = 0; x < p; x++)
             for (int y = 0; y < q; y++) {
@@ -153,8 +162,8 @@ public class SeamCarver {
 
         int newWidth = picture[0].length - 1;
         for (int i = 0; i < seam.length; i++) {
-            Color[] oldRow = picture[i];
-            Color[] newRow = new Color[newWidth];
+            byte[][] oldRow = picture[i];
+            byte[][] newRow = new byte[newWidth][3];
             System.arraycopy(oldRow, 0, newRow, 0, seam[i]);
             System.arraycopy(oldRow, seam[i] + 1, newRow, seam[i], newWidth
                     - seam[i]);
