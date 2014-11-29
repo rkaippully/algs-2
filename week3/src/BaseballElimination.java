@@ -45,10 +45,10 @@ public class BaseballElimination {
     }
 
     private int getTeamIndex(String team) {
-        Integer idx = teams.get(team);
+        Object idx = teams.get(team);
         if (idx == null)
             throw new IllegalArgumentException();
-        return idx;
+        return (Integer) idx;
     }
 
     // number of wins for given team
@@ -82,7 +82,11 @@ public class BaseballElimination {
     public Iterable<String> certificateOfElimination(String team) {
         int idx = getTeamIndex(team);
         computeElimination(idx);
-        return certificates.get(idx);
+        SET<String> certs = certificates.get(idx);
+        if (certs.isEmpty())
+            return null;
+        else
+            return certs;
     }
 
     private void computeElimination(int team) {
