@@ -1,4 +1,3 @@
-import java.io.ByteArrayOutputStream;
 
 public class BurrowsWheeler {
 
@@ -26,11 +25,17 @@ public class BurrowsWheeler {
     // to standard output
     public static void decode() {
         int first = BinaryStdIn.readInt();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while (!BinaryStdIn.isEmpty())
-            baos.write(BinaryStdIn.readByte());
-        byte[] tails = baos.toByteArray();
-        int N = tails.length;
+        int N = 0;
+        byte[] tails = new byte[256];
+        while (!BinaryStdIn.isEmpty()) {
+            // Grow if needed
+            if (N >= tails.length) {
+                byte[] tmp = new byte[tails.length * 2];
+                System.arraycopy(tails, 0, tmp, 0, tails.length);
+                tails = tmp;
+            }
+            tails[N++] = BinaryStdIn.readByte();
+        }
 
         // Compute frequencies of each character
         int[] freq = new int[257];
