@@ -4,7 +4,7 @@ public class BurrowsWheeler {
     // apply Burrows-Wheeler encoding, reading from standard input and writing
     // to standard output
     public static void encode() {
-        String s = StdIn.readAll();
+        String s = BinaryStdIn.readString();
         int N = s.length();
         CircularSuffixArray csa = new CircularSuffixArray(s);
         byte[] t = new byte[N];

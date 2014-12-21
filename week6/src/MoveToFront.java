@@ -8,8 +8,8 @@ public class MoveToFront {
         for (int i = 0; i < 256; i++)
             chars.add((byte) i);
 
-        while (!StdIn.isEmpty()) {
-            byte ch = (byte) StdIn.readChar();
+        while (!BinaryStdIn.isEmpty()) {
+            byte ch = BinaryStdIn.readByte();
             int pos = chars.indexOf(ch);
             BinaryStdOut.write((byte) pos);
             // Move ch to the begining
@@ -28,8 +28,8 @@ public class MoveToFront {
         for (int i = 0; i < 256; i++)
             chars.add((byte) i);
 
-        while (!StdIn.isEmpty()) {
-            int pos = StdIn.readChar();
+        while (!BinaryStdIn.isEmpty()) {
+            int pos = BinaryStdIn.readByte();
             byte ch = chars.remove(pos);
             BinaryStdOut.write(ch);
             // Move ch to the begining
